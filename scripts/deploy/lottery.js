@@ -1,26 +1,29 @@
 const hre = require("hardhat");
+const {
+  networkConfig,
+  developmentChains,
+} = require("../../helper-hardhat.config");
 
 const main = async () => {
   const networkName = hre.network.name;
 
   const Lottery = await hre.ethers.getContractFactory("Lottery");
 
-  if (networkName !== "hardhat" && networkName !== "localhost") {
+  if (!developmentChains.includes(networkName)) {
     console.log("Deploying to the", networkName, "network");
 
-    const ethUSDPriceFeed = hre.config.networks[networkName].ethUSDPriceFeed;
-    const vrfCoordinatorAddress =
-      hre.config.networks[networkName].vrfCoordinatorAddress;
-    const vrfLinkToken = hre.config.networks[networkName].vrfLinkToken;
-    const vrfKeyhash = hre.config.networks[networkName].vrfKeyhash;
-    const vrfFee = hre.config.networks[networkName].vrfFee;
+    const ethUSDPriceFeed = networkConfig[networkName].ethUSDPriceFeed;
+    const vrfCoordinator = networkConfig[networkName].vrfCoordinator;
+    const linkToken = networkConfig[networkName].linkToken;
+    const keyhash = networkConfig[networkName].keyhash;
+    const fee = networkConfig[networkName].fee;
 
     const lottery = await Lottery.deploy(
       ethUSDPriceFeed,
-      vrfCoordinatorAddress,
-      vrfLinkToken,
-      vrfFee,
-      vrfKeyhash
+      vrfCoordinator,
+      linkToken,
+      fee,
+      keyhash
     );
     await lottery.deployed();
 
@@ -38,7 +41,36 @@ const main = async () => {
 
     console.log("MockV3Aggregator deployed to:", mockV3Aggregator.address);
 
-    const lottery = await Lottery.deploy(ethUSDPriceFeed);
+    const LinkToken = await hre.ethers.getContractFactory("LinkToken");
+    const linkToken = await LinkToken.deploy();
+    await linkToken.deployed();
+
+    const linkTokenAddress = linkToken.address;
+
+    console.log("LinkToken deployed to:", linkToken.address);
+
+    const VRFCoordinatorMock = await hre.ethers.getContractFactory(
+      "VRFCoordinatorMock"
+    );
+    const vrfCoordinatorMock = await VRFCoordinatorMock.deploy(
+      linkTokenAddress
+    );
+    await vrfCoordinatorMock.deployed();
+
+    const vrfCoordinator = vrfCoordinatorMock.address;
+
+    console.log("VRFCoordinatorMock deployed to:", vrfCoordinatorMock.address);
+
+    const keyhash = networkConfig[networkName].keyhash;
+    const fee = networkConfig[networkName].fee;
+
+    const lottery = await Lottery.deploy(
+      ethUSDPriceFeed,
+      vrfCoordinator,
+      linkTokenAddress,
+      fee,
+      keyhash
+    );
     await lottery.deployed();
 
     console.log("Lottery deployed to:", lottery.address);
