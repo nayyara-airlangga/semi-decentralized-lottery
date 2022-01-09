@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { networkConfig } = require("../helper-hardhat.config");
+const { networkConfig } = require("../../helper-hardhat.config");
 
 describe("Lottery - Entrance Fee", function () {
   it("Should show the accurate entrance fee", async function () {
