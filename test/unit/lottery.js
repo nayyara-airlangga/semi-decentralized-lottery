@@ -6,7 +6,7 @@ const { deployLottery, fundWithLink } = require("../../scripts/utils");
 const networkName = network.name;
 
 if (developmentChains.includes(networkName)) {
-  describe("Lottery - Entrance Fee", () => {
+  describe("Unit Tests - Lottery - Entrance Fee", () => {
     it("Should show the accurate entrance fee", async () => {
       const { lottery } = await deployLottery();
 
@@ -16,7 +16,7 @@ if (developmentChains.includes(networkName)) {
     });
   });
 
-  describe("Lottery - Can't Enter Unless Started", () => {
+  describe("Unit Tests - Lottery - Can't Enter Unless Started", () => {
     it("Should raise an error if tried to enter before lottery is started", async () => {
       const { lottery } = await deployLottery();
 
@@ -34,7 +34,7 @@ if (developmentChains.includes(networkName)) {
     });
   });
 
-  describe("Lottery - Can Start and Enter Lottery", () => {
+  describe("Unit Tests - Lottery - Can Start and Enter Lottery", () => {
     it("Owner should be able to start and players can enter the lottery", async () => {
       const { lottery } = await deployLottery();
 
@@ -50,7 +50,7 @@ if (developmentChains.includes(networkName)) {
     });
   });
 
-  describe("Lottery - Can End Lottery", () => {
+  describe("Unit Tests - Lottery - Can End Lottery", () => {
     it("Owner should be able to end the lottery", async () => {
       const { lottery, linkTokenAddress } = await deployLottery();
 
@@ -70,7 +70,7 @@ if (developmentChains.includes(networkName)) {
     });
   });
 
-  describe("Lottery - Can Pick Winner Correctly", () => {
+  describe("Unit Tests - Lottery - Can Pick Winner Correctly", () => {
     it("Should pick a winner correctly", async () => {
       const { lottery, linkTokenAddress, vrfCoordinatorAddress } =
         await deployLottery();
