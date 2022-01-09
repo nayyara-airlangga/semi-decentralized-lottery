@@ -53,7 +53,7 @@ const deployLottery = async (networkName = "hardhat") => {
 
     console.log("Lottery deployed to:", lottery.address);
 
-    return lottery;
+    return { lottery, linkTokenAddress };
   }
   console.log("Deploying to the", networkName, "network");
 
@@ -76,9 +76,20 @@ const deployLottery = async (networkName = "hardhat") => {
 
   console.log("Lottery deployed to:", lottery.address);
 
-  return lottery;
+  return { lottery, linkTokenAddress: linkToken };
+};
+
+const fundWithLink = async (
+  contractAddress,
+  linkTokenAddress,
+  networkName = "hardhat"
+) => {
+  const linkToken = await ethers.getContractAt("LinkToken", linkTokenAddress);
+
+  await linkToken.transfer(contractAddress, networkConfig[networkName].fee);
 };
 
 module.exports = {
   deployLottery,
+  fundWithLink,
 };
