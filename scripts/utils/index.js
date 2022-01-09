@@ -53,7 +53,7 @@ const deployLottery = async (networkName = "hardhat") => {
 
     console.log("Lottery deployed to:", lottery.address);
 
-    return { lottery, linkTokenAddress };
+    return { lottery, linkTokenAddress, vrfCoordinatorAddress: vrfCoordinator };
   }
   console.log("Deploying to the", networkName, "network");
 
@@ -76,7 +76,11 @@ const deployLottery = async (networkName = "hardhat") => {
 
   console.log("Lottery deployed to:", lottery.address);
 
-  return { lottery, linkTokenAddress: linkToken };
+  return {
+    lottery,
+    linkTokenAddress: linkToken,
+    vrfCoordinatorAddress: vrfCoordinator,
+  };
 };
 
 const fundWithLink = async (

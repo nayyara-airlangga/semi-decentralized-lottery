@@ -72,7 +72,8 @@ if (developmentChains.includes(networkName)) {
 
   describe("Lottery - Can Pick Winner Correctly", () => {
     it("Should pick a winner correctly", async () => {
-      const { lottery, linkTokenAddress } = await deployLottery();
+      const { lottery, linkTokenAddress, vrfCoordinatorAddress } =
+        await deployLottery();
 
       const [owner, account1, account2, account3] = await ethers.getSigners();
 
@@ -85,6 +86,33 @@ if (developmentChains.includes(networkName)) {
       await lottery.connect(account3).enter({ value: entranceFee + 1 });
 
       await fundWithLink(lottery.address, linkTokenAddress, networkName);
+
+      const endLottery = await lottery.connect(owner).endLottery();
+      const receipt = await endLottery.wait();
+
+      const requestId = receipt?.events.reverse()[0].args["requestId"];
+
+      const vrfCoordinator = await ethers.getContractAt(
+        "VRFCoordinatorMock",
+        vrfCoordinatorAddress
+      );
+
+      await vrfCoordinator
+        .connect(owner)
+        .callBackWithRandomness(requestId, 777, lottery.address);
+
+      const startingBalanceAccount1 = await account1.getBalance();
+      const lotteryBalance = await ethers
+        .getDefaultProvider()
+        .getBalance(lottery.address);
+
+      expect(await lottery.recentWinner()).to.equal(account1.address);
+      expect(
+        await ethers.getDefaultProvider().getBalance(lottery.address)
+      ).to.equal(0);
+      expect((await account1.getBalance()) + 0).to.equal(
+        startingBalanceAccount1 + lotteryBalance
+      );
     });
   });
 }

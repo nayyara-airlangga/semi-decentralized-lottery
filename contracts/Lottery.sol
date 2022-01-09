@@ -22,6 +22,7 @@ contract Lottery is VRFConsumerBase {
     uint256 public randomness;
     address payable public recentWinner;
     LotteryState public lotteryState;
+    event RequestedRandomness(bytes32 requestId);
 
     constructor(
         address _priceFeedAddress,
@@ -79,6 +80,7 @@ contract Lottery is VRFConsumerBase {
     function endLottery() external onlyOwner {
         lotteryState = LotteryState.CalculatingWinner;
         bytes32 requestId = requestRandomness(keyhash, fee);
+        emit RequestedRandomness(requestId);
     }
 
     function fulfillRandomness(bytes32, uint256 _randomness) internal override {
