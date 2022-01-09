@@ -1,48 +1,52 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
-const { networkConfig } = require("../../helper-hardhat.config");
+const { ethers, network } = require("hardhat");
+const { developmentChains } = require("../../helper-hardhat.config");
+const { deployLottery } = require("../../scripts/utils");
 
-describe("Lottery - Entrance Fee", function () {
-  it("Should show the accurate entrance fee", async function () {
-    const MockV3Aggregator = await hre.ethers.getContractFactory(
-      "MockV3Aggregator"
-    );
-    const mockV3Aggregator = await MockV3Aggregator.deploy(8, 3 * 10 ** 11);
-    await mockV3Aggregator.deployed();
+if (developmentChains.includes(network.name)) {
+  describe("Lottery - Entrance Fee", function () {
+    it("Should show the accurate entrance fee", async function () {
+      const lottery = await deployLottery();
 
-    const ethUSDPriceFeed = mockV3Aggregator.address;
-
-    const LinkToken = await hre.ethers.getContractFactory("LinkToken");
-    const linkToken = await LinkToken.deploy();
-    await linkToken.deployed();
-
-    const linkTokenAddress = linkToken.address;
-
-    const VRFCoordinatorMock = await hre.ethers.getContractFactory(
-      "VRFCoordinatorMock"
-    );
-    const vrfCoordinatorMock = await VRFCoordinatorMock.deploy(
-      linkTokenAddress
-    );
-    await vrfCoordinatorMock.deployed();
-
-    const vrfCoordinator = vrfCoordinatorMock.address;
-
-    const keyhash = networkConfig.hardhat.keyhash;
-    const fee = networkConfig.hardhat.fee;
-
-    const Lottery = await ethers.getContractFactory("Lottery");
-    const lottery = await Lottery.deploy(
-      ethUSDPriceFeed,
-      vrfCoordinator,
-      linkTokenAddress,
-      fee,
-      keyhash
-    );
-    await lottery.deployed();
-
-    expect(await lottery.getEntranceFee()).to.equal(
-      ethers.utils.parseUnits("16666666666666666", 0)
-    );
+      expect(await lottery.getEntranceFee()).to.equal(
+        ethers.utils.parseUnits("16666666666666666", 0)
+      );
+    });
   });
-});
+
+  describe("Lottery - Can't Enter Unless Started", function () {
+    it("Should raise an error if tried to enter before lottery is started", async function () {
+      const lottery = await deployLottery();
+
+      const [owner, account1] = await ethers.getSigners();
+
+      const entranceFee = await lottery.getEntranceFee();
+
+      try {
+        await lottery.connect(account1).enter({ value: entranceFee + 1 });
+      } catch (error) {
+        expect(error.message).to.equal(
+          "VM Exception while processing transaction: reverted with reason string 'Sorry, we're currently not opening a lottery'"
+        );
+      }
+    });
+  });
+
+  describe("Lottery - Can Start and Enter Lottery", function () {
+    it("Owner should be able to start and players can enter the lottery", async function () {
+      const lottery = await deployLottery();
+
+      const [owner, account1] = await ethers.getSigners();
+
+      const entranceFee = await lottery.getEntranceFee();
+
+      try {
+        await lottery.connect(account1).enter({ value: entranceFee + 1 });
+      } catch (error) {
+        expect(error.message).to.equal(
+          "VM Exception while processing transaction: reverted with reason string 'Sorry, we're currently not opening a lottery'"
+        );
+      }
+    });
+  });
+}
