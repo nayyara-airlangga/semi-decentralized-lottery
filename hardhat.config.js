@@ -4,7 +4,8 @@ require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 
-const privateKey = process.env.PRIVATE_KEY;
+const privateKeyOwner = process.env.PRIVATE_KEY_OWNER;
+const privateKeyAccount1 = process.env.PRIVATE_KEY_ACCOUNT1;
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 
 // Mainnet Configs
@@ -20,11 +21,13 @@ module.exports = {
     localhost: {},
     mainnet: {
       url: mainnetRPCUrl,
-      accounts: [privateKey],
+      accounts: [privateKeyOwner, privateKeyAccount1],
+      timeout: 180000,
     },
     kovan: {
       url: kovanRPCUrl,
-      accounts: [privateKey],
+      accounts: [privateKeyOwner, privateKeyAccount1],
+      timeout: 180000,
     },
   },
   etherscan: {

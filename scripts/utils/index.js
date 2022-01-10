@@ -90,7 +90,12 @@ const fundWithLink = async (
 ) => {
   const linkToken = await ethers.getContractAt("LinkToken", linkTokenAddress);
 
-  await linkToken.transfer(contractAddress, networkConfig[networkName].fee);
+  const transaction = await linkToken.transfer(
+    contractAddress,
+    networkConfig[networkName].fee
+  );
+
+  const transactionReceipt = await transaction.wait();
 };
 
 module.exports = {
